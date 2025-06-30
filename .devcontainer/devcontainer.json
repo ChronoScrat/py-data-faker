@@ -5,6 +5,7 @@
     },
     "workspaceFolder": "${localWorkspaceFolder}",
     "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind",
+    "remoteUser": "centos",
     "customizations": {
         "vscode": {
             "extensions": [
