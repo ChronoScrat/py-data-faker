@@ -1,0 +1,56 @@
+FROM quay.io/centos/centos:stream10
+
+
+# General DNF config
+RUN dnf config-manager --save --setopt=fastestmirror=True \
+    --setopt=max_parallel_downloads=10 \
+    --setopt=installonly_limit=10
+
+RUN dnf config-manager --set-enabled crb
+RUN dnf install -y epel-release python3-dnf-plugins-core
+
+# Tooling
+RUN dnf install -y \
+    git \
+    tree \
+    nano \
+    uv
+
+# Args
+ARG OPENJDK_VERSION=21
+ARG SPARK_VERSION="4.0.0"
+ARG HADOOP_VERSION="3"
+
+# Deps
+RUN dnf install -y \
+    java-${OPENJDK_VERSION}-openjdk
+
+ENV JAVA_HOME="/etc/alternatives/jre"
+ENV SPARK_HOME="/opt/spark"
+ENV PATH="${PATH}:${SPARK_HOME}/bin"
+ENV SPARK_OPTS="--driver-java-options=-Xms1024M --driver-java-options=-Xmx4096M --driver-java-options=-Dlog4j.logLevel=info"
+
+# Install Spark
+RUN mkdir --parents "/opt"
+RUN curl --location "https://dlcdn.apache.org/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" -o "/tmp/spark.tar.gz"
+RUN tar xzf /tmp/spark.tar.gz -C /opt --owner root --group root --no-same-owner
+RUN rm -f /tmp/spark.tar.gz
+RUN ln -s "/opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}" "${SPARK_HOME}"
+
+# Clean Image
+RUN dnf clean all -y
+RUN dnf autoremove -y
+RUN rm -fr /var/cache/dnf/*
+
+# User
+ARG USERNAME="centos"
+ARG USER_ID=1000
+ARG USER_GID=$USER_ID
+
+RUN groupadd --gid ${USER_GID} ${USERNAME}
+RUN useradd -m ${USERNAME} --uid ${USER_ID} --gid ${USER_GID}
+
+RUN echo ${USERNAME} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${USERNAME} \
+    && chmod 0440 /etc/sudoers.d/${USERNAME}
+
+USER centos
