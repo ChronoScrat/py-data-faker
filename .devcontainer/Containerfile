@@ -15,16 +15,20 @@ RUN dnf install -y \
     tree \
     nano \
     sudo \
-    uv
+    uv \
+    pip
 
 # Args
-ARG OPENJDK_VERSION=21
+ARG OPENJDK_VERSION="21"
 ARG SPARK_VERSION="4.0.0"
 ARG HADOOP_VERSION="3"
+ARG PY_VERSION="3.12"
 
 # Deps
 RUN dnf install -y \
     java-${OPENJDK_VERSION}-openjdk
+
+RUN pip install py4j
 
 ENV JAVA_HOME="/etc/alternatives/jre"
 ENV SPARK_HOME="/opt/spark"
@@ -37,6 +41,10 @@ RUN curl --location "https://dlcdn.apache.org/spark/spark-${SPARK_VERSION}/spark
 RUN tar xzf /tmp/spark.tar.gz -C /opt --owner root --group root --no-same-owner
 RUN rm -f /tmp/spark.tar.gz
 RUN ln -s "/opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}" "${SPARK_HOME}"
+
+# Make PySpark available
+# Modifying PYTHONPATH is the most correct solution, but this will do
+RUN ln -s ${SPARK_HOME}/python/pyspark /usr/lib/python{PY_VERSION}/pyspark
 
 # Clean Image
 RUN dnf clean all -y
