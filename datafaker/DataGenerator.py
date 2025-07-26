@@ -1,6 +1,5 @@
 import pyspark
 from pyspark.sql import SparkSession
-from functools import reduce
 
 class DataGenerator:
     def __init__(self,spark: SparkSession, database: str):
