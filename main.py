@@ -2,7 +2,7 @@
 
 # py-data-faker utility
 
-# This file is simply a utility to make use of the `py-data-faker`
+# This file is simply a utility to make use of the `py-datafaker`
 # package. Besides being a command line utility, it provides an
 # example on how to use the package on your own implementation.
 
