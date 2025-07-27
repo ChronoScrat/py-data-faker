@@ -9,6 +9,7 @@ dependencies = [
     "dataclasses>=0.8",
     "datetime>=5.5",
     "logging>=0.4.9.6",
+    "pandas>=2.3.1",
     "pyyaml>=6.0.2",
     "typing>=3.10.0.0",
 ]

@@ -5,3 +5,6 @@ __pycache__
 metastore_db
 spark-warehouse
 *.log
+*.zip
+*.tar
+*.tar.gz

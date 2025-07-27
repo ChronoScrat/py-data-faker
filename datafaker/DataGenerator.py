@@ -12,7 +12,6 @@ class DataGenerator:
 
             df = spark.range(table.rows).toDF("rowID")
             for col in table.columns:
-                print(col.name)
                 df = df.withColumn(col.name, col.column())
             df = df.drop("rowID")
 

@@ -13,6 +13,7 @@ parser = argparse.ArgumentParser(
     )
 parser.add_argument("--database", help="Hive database name", required=True,action="store")
 parser.add_argument("--file", help="Path to YAML schema file", required=True,action="store")
+parser.add_argument("--download", help="Download final database", required=False, action="store_true")
 
 
 
@@ -27,11 +28,21 @@ def main():
     # Create database if it doesn't exist
     spark.sql(f"CREATE DATABASE IF NOT EXISTS {args.database}")
     schema = YamlParser.parse_schema_from_file(args.file)
-    print(type(spark))
     dataGenerator = DataGenerator(spark,args.database)
 
     dataGenerator.generate_and_write_data(schema)
 
+    if (args.download):
+        import os
+        import pandas
+        import subprocess
+
+        os.makedirs(f"/tmp/{args.database}", exist_ok=True)
+
+        for table in schema.tables:
+            spark.table(f"{args.database}.{table.name}").toPandas().to_csv(f"/tmp/{args.database}/{table.name}.csv", index=False)
+        
+        subprocess.run(["tar", "cvzf", f"{args.database}.tar.gz", f"/tmp/{args.database}/"])
 
 if __name__ == "__main__":
     main()
