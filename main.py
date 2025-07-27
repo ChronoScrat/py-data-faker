@@ -1,6 +1,11 @@
 #!/usr/bin/python3
 
-import pyspark
+# py-data-faker utility
+
+# This file is simply a utility to make use of the `py-data-faker`
+# package. Besides being a command line utility, it provides an
+# example on how to use the package on your own implementation.
+
 from pyspark.sql import SparkSession
 import logging
 import argparse
@@ -11,11 +16,13 @@ from datafaker import SchemaParser, DataGenerator
 ## We need a hive database name and a path to the schema file
 parser = argparse.ArgumentParser(
         prog="pyDataFaker",
-        description="Fake data!"
+        description="""Generate fake datasets in Apache Spark and store them in Apache Hive! 
+        This utility makes use of py-datafaker to generate fake data from a provided schema and store it
+        in Apache Hive or other storage backends."""
     )
-parser.add_argument("--database", help="Hive database name", required=True,action="store")
-parser.add_argument("--file", help="Path to YAML schema file", required=True,action="store")
-parser.add_argument("--download", help="Download final database", required=False, action="store_true")
+parser.add_argument("--database", help="The Hive database name in which the tables will be created. If it does not exist, it will be created.", required=True,action="store")
+parser.add_argument("--file", help="The path to the YAML schema file detailing the tables and columns", required=True,action="store")
+parser.add_argument("--download", help="[OPTIONAL] If provided, the generated datasets will be downloaded as CSVs into the current directory (archived and compressed)", required=False, action="store_true")
 
 
 
