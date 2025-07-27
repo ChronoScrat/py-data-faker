@@ -43,3 +43,17 @@ def test_parse_column_missing_type():
 # def test_parse_column_invalid_type():
 #     with pytest.raises(ValueError):
 #         parse_column_type(column_random_invalid_type)
+
+
+
+# `parse_schema_from_file()`
+
+import yaml
+from pathlib import Path
+
+schema_test_file = Path(__file__).parent/"example_schema_test.yaml"
+
+def test_parse_schema_from_file():
+    schema_test = parse_schema_from_file(schema_test_file)
+    assert isinstance(schema_test, Schema)
+

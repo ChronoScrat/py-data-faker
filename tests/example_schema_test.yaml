@@ -1,0 +1,8 @@
+tables:
+- name: card_dim_c
+  rows: 10
+  columns:
+  - name: card_id
+    data_type: String
+    column_type: Fixed
+    value: "MyCard"
