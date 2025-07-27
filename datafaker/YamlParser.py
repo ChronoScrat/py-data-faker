@@ -9,11 +9,13 @@ def parse_schema_from_file(file):
     for tbl in schema_defs.get("tables", []):
 
         columns = [ parse_column_type(col) for col in tbl.get("columns", []) ]
+        partitions = tbl.get("partitions")
 
         table = SchemaTable(
             name = tbl["name"],
             rows = tbl["rows"],
-            columns = columns
+            columns = columns,
+            partitions = partitions
         )
 
         tables.append(table)
