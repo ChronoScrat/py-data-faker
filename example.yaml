@@ -29,6 +29,12 @@ tables:
   - name: hshd_isba_market_code
     column_type: Expression
     expression: concat('isba', hshd_code)
+  - name: prsn_gender
+    column_type: Selection
+    values:
+      - male
+      - female
+      - other
 
 - name: transaction_item_fct_data
   rows: 100
