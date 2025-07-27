@@ -5,7 +5,7 @@ from pyspark.sql import SparkSession
 import logging
 import argparse
 
-from datafaker import YamlParser, DataGenerator
+from datafaker import SchemaParser, DataGenerator
 
 # Argument Paser:
 ## We need a hive database name and a path to the schema file
@@ -29,7 +29,7 @@ def main():
 
     # Create database if it doesn't exist
     spark.sql(f"CREATE DATABASE IF NOT EXISTS {args.database}")
-    schema = YamlParser.parse_schema_from_file(args.file)
+    schema = SchemaParser.parse_schema_from_file(args.file)
     dataGenerator = DataGenerator(spark,args.database)
 
     dataGenerator.generate_and_write_data(schema)
