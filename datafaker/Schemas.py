@@ -56,6 +56,8 @@ class SchemaColumn(ABC):
 
 class SchemaColumnExpression(SchemaColumn):
     def __init__(self, name: str, expression: str):
+        if not isinstance(expression, str):
+            raise TypeError(f"Expected string for expression in column {name}, got {type(expression).__name__}")
         self._name = name
         self._expression = expression
     
