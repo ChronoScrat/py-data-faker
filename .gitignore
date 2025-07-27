@@ -4,6 +4,7 @@ __pycache__
 .venv
 metastore_db
 spark-warehouse
+artifacts
 *.log
 *.zip
 *.tar
