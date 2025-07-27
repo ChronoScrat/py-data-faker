@@ -10,10 +10,14 @@ class DataGenerator:
 
         for table in schema.tables:
 
+            partitions = table.partitions
+            if not partitions:
+                partitions = []
+
             df = spark.range(table.rows).toDF("rowID")
             for col in table.columns:
                 df = df.withColumn(col.name, col.column())
             df = df.drop("rowID")
 
-            df.write.saveAsTable(name=f"{database}.{table.name}", mode="overwrite")
+            df.write.saveAsTable(name=f"{database}.{table.name}", mode="overwrite", partitionBy = partitions)
         

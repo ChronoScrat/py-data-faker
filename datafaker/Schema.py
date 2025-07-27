@@ -35,6 +35,7 @@ class SchemaTable:
     name: str
     rows: int
     columns: List['SchemaColumn']
+    partitions: Optional[List['str']]
 
 # SchemaColumn class: this is an abstract class (hence the use of ABC and @abstractmethod). The details
 # are actually implemented by the subclasses as needed.
