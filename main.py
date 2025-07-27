@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import pyspark
 from pyspark.sql import SparkSession
 import logging

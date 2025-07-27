@@ -44,7 +44,7 @@ RUN ln -s "/opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}" "${SPARK_HOM
 
 # Make PySpark available
 # Modifying PYTHONPATH is the most correct solution, but this will do
-RUN ln -s ${SPARK_HOME}/python/pyspark /usr/lib/python{PY_VERSION}/pyspark
+RUN ln -s ${SPARK_HOME}/python/pyspark /usr/lib/python${PY_VERSION}/site-packages/pyspark
 
 # Clean Image
 RUN dnf clean all -y
