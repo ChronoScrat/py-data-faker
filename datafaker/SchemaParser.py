@@ -74,6 +74,9 @@ def parse_column_type(column: dict) -> SchemaColumn:
                 raise ValueError(f"Column {column_name} of type {column_type} is missing max")
             else:
                 return SchemaColumnRandomFactory.create(name = column_name, min = column_min, max = column_max)
+        
+        case _:
+            raise ValueError(f"Column {column_name} has unsupported column type: {column_type}")
 
 # Parse Schema from file
 # This method recieves the path to a file (the schema file) and returns
