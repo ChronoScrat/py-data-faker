@@ -5,6 +5,9 @@
 # original, this was spread out across multiple files. I chose to combine them into
 # a single file because of python shenenigans.
 
+# Code is adpted from dunnhumby's original implementation in Scala.
+# Please check: https://github.com/dunnhumby/data-faker
+
 
 from dataclasses import dataclass
 from typing import List, Optional, Generic, TypeVar, Union, Any
