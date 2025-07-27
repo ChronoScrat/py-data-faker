@@ -1,3 +1,12 @@
+# Schema Parser
+
+# This file implements the logic for choosing a given Schema class for
+# a provided column in the schema file. It is adapted from the original
+# `YamlParser` data-faker.
+
+# Code is adpted from dunnhumby's original implementation in Scala.
+# Please check: https://github.com/dunnhumby/data-faker
+
 import yaml
 from datafaker.Schemas import *
 
