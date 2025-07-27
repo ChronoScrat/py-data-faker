@@ -1,3 +1,11 @@
+# Schemas file
+
+# This file holds the Schema classes for all supported column types in `data-faker`,
+# as well as the schema classes for the tables and for the resulting database. In the
+# original, this was spread out across multiple files. I chose to combine them into
+# a single file because of python shenenigans.
+
+
 from dataclasses import dataclass
 from typing import List, Optional, Generic, TypeVar, Union, Any
 import builtins
@@ -9,15 +17,24 @@ from pyspark.sql import Column
 from pyspark.sql.types import IntegerType, DoubleType, StringType, DateType, TimestampType
 
 
+# Schema Class: this is the master schema class, that holds a list of different tables.
+# This is passed to DataGenerator to create all the tables with fake data.
+
 @dataclass
 class Schema:
     tables: List['SchemaTable']
+
+# SchemaTable Class: this is the schema class for a single table. It holds the name, number of rows
+# and all the columns for the table.
 
 @dataclass
 class SchemaTable:
     name: str
     rows: int
     columns: List['SchemaColumn']
+
+# SchemaColumn class: this is an abstract class (hence the use of ABC and @abstractmethod). The details
+# are actually implemented by the subclasses as needed.
 
 class SchemaColumn(ABC):
     @property
@@ -29,7 +46,9 @@ class SchemaColumn(ABC):
     def column(self, rowID: Optional[Column] = None) -> Column:
         pass
 
-# Expression
+
+# Expression Schema Column Subclass:
+# This column allows the user to pass a SQL expression to the DataGenerator
 
 class SchemaColumnExpression(SchemaColumn):
     def __init__(self, name: str, expression: str):
@@ -43,11 +62,13 @@ class SchemaColumnExpression(SchemaColumn):
     def column(self, rowID: Optional[Column] = None) -> Column:
         return F.expr(self._expression)
 
-# Fixed
+
+# Fixed Schema Column Class:
+# This column allows the user to pass a single value to the DataGenerator
 
 T = TypeVar('T')
 
-class SchemaColumnExpressionFixed(SchemaColumn):
+class SchemaColumnFixed(SchemaColumn):
     def __init__(self, name: str, value: T):
         self._name = name
         self._value = value
@@ -60,7 +81,11 @@ class SchemaColumnExpressionFixed(SchemaColumn):
         return F.lit(self._value)
     
 
-# Sequential
+# Sequential Schema Column Class:
+# This column allows values to be generated sequentially. This is implemented
+# by using the ephemeral `rowID` column. The actual class is merely a placeholder,
+# the actual implementation depends on the column type. A "Factory" is then used
+# to decide which class will actually be implemented.
 
 class SchemaColumnSequential(SchemaColumn):
     pass
@@ -129,7 +154,10 @@ class SchemaColumnSequentialFactory:
             raise TypeError(f"Unsupported start/step types: {type(start)}, {type(step)}")
         
 
-# Random
+# Random Schema Column Class:
+# This column allows values to be generated randomly. The actual class is merely 
+# a placeholder, the actual implementation depends on the column type. 
+# A "Factory" is then used to decide which class will actually be implemented.
 
 class SchemaColumnRandom(SchemaColumn):
     pass
@@ -217,7 +245,9 @@ class SchemaColumnRandomFactory:
             raise TypeError(f"Unsupported types for random column: min={type(min)}, max={type(max)}")
 
 
-# Selection
+# Selection Schema Column Class
+# This column allows the user to supply a list of possible valued to
+# the DataGenerator, and one will be randomly selected.
 
 class SchemaColumnSelection(SchemaColumn):
     def __init__(self, name: str, values: List[Any]):
@@ -254,3 +284,69 @@ class SchemaColumnSelection(SchemaColumn):
         
         to_udf_selection = F.udf(pick, return_type)
         return to_udf_selection((F.rand() * num_val).cast("int"))
+
+
+# Selection Logic
+
+class SchemaColumnType:
+    FIXED = "Fixed"
+    RANDOM = "Random"
+    SELECTION = "Selection"
+    SEQUENTIAL = "Sequential"
+    EXPRESSION = "Expression"
+
+
+def parse_column_type(column: dict) -> SchemaColumn:
+    column_name = column.get("name")
+    column_type = column.get("column_type")
+
+    if not column_name:
+        raise ValueError("Column missing name")
+    
+    if not column_type:
+        raise ValueError("Missing column_type")
+    
+
+    match column_type:
+
+        case SchemaColumnType.FIXED:
+            column_value = column.get("value")
+            if not column_value:
+                raise ValueError(f"Column {column_name} of type {column_type} is missing value")
+            else:
+                return SchemaColumnFixed(name = column_name, value = column_value)
+        
+        case SchemaColumnType.EXPRESSION:
+            column_expr = column.get("expression")
+            if not column_expr:
+                raise ValueError(f"Column {column_name} of type {column_type} is missing expression")
+            else:
+                return SchemaColumnExpression(name = column_name, expression = column_expr)
+            
+        case SchemaColumnType.SELECTION:
+            column_values = column.get("values")
+            if not column_values:
+                raise ValueError(f"Column {column_name} of type {column_type} is missing values")
+            else:
+                return SchemaColumnSelection(name = column_name, values = column_values)
+            
+        case SchemaColumnType.SEQUENTIAL:
+            column_start = column.get("start")
+            column_step = column.get("step")
+            if not column_start:
+                raise ValueError(f"Column {column_name} of type {column_type} is missing start")
+            elif not column_step:
+                raise ValueError(f"Column {column_name} of type {column_type} is missing step")
+            else:
+                return SchemaColumnSequentialFactory.create(name = column_name, start = column_start, step = column_step)
+        
+        case SchemaColumnType.RANDOM:
+            column_min = column.get("min")
+            column_max = column.get("max")
+            if not column_min:
+                raise ValueError(f"Column {column_name} of type {column_type} is missing min")
+            elif not column_max:
+                raise ValueError(f"Column {column_name} of type {column_type} is missing max")
+            else:
+                return SchemaColumnRandomFactory.create(name = column_name, min = column_min, max = column_max)
+            
