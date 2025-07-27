@@ -1,6 +1,5 @@
 import yaml
-from Schema import Schema, SchemaTable, parse_column_type
-
+from datafaker.Schema import Schema, SchemaTable, parse_column_type
         
 def parse_schema_from_file(file):
     with open(file, "r") as file:
@@ -19,4 +18,4 @@ def parse_schema_from_file(file):
 
         tables.append(table)
     
-    return Schema(tables = table)
+    return Schema(tables = tables)

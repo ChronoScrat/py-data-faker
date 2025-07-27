@@ -211,7 +211,7 @@ class SchemaColumnRandomDate(SchemaColumnRandom):
         return self._name
     
     def column(self, rowID: Optional[Column] = None) -> Column:
-        return F.to_date(self._timestamp(rowID))
+        return F.to_date(self._timestamp.column(rowID))
 
 
 class SchemaColumnRandomBoolean(SchemaColumnRandom):
@@ -305,13 +305,12 @@ def parse_column_type(column: dict) -> SchemaColumn:
     
     if not column_type:
         raise ValueError("Missing column_type")
-    
 
     match column_type:
 
         case SchemaColumnType.FIXED:
             column_value = column.get("value")
-            if not column_value:
+            if not column_value and column_value != 0:
                 raise ValueError(f"Column {column_name} of type {column_type} is missing value")
             else:
                 return SchemaColumnFixed(name = column_name, value = column_value)
@@ -333,9 +332,9 @@ def parse_column_type(column: dict) -> SchemaColumn:
         case SchemaColumnType.SEQUENTIAL:
             column_start = column.get("start")
             column_step = column.get("step")
-            if not column_start:
+            if not column_start and column_start != 0:
                 raise ValueError(f"Column {column_name} of type {column_type} is missing start")
-            elif not column_step:
+            elif not column_step and column_step != 0:
                 raise ValueError(f"Column {column_name} of type {column_type} is missing step")
             else:
                 return SchemaColumnSequentialFactory.create(name = column_name, start = column_start, step = column_step)
@@ -343,9 +342,9 @@ def parse_column_type(column: dict) -> SchemaColumn:
         case SchemaColumnType.RANDOM:
             column_min = column.get("min")
             column_max = column.get("max")
-            if not column_min:
+            if not column_min and column_min != 0:
                 raise ValueError(f"Column {column_name} of type {column_type} is missing min")
-            elif not column_max:
+            elif not column_max and column_max != 0:
                 raise ValueError(f"Column {column_name} of type {column_type} is missing max")
             else:
                 return SchemaColumnRandomFactory.create(name = column_name, min = column_min, max = column_max)
