@@ -40,9 +40,9 @@ def test_parse_column_missing_type():
     with pytest.raises(ValueError):
         parse_column_type(column_random_missing_type)
 
-# def test_parse_column_invalid_type():
-#     with pytest.raises(ValueError):
-#         parse_column_type(column_random_invalid_type)
+def test_parse_column_invalid_type():
+    with pytest.raises(ValueError):
+        parse_column_type(column_random_invalid_type)
 
 
 
