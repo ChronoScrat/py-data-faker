@@ -68,9 +68,9 @@ def parse_column_type(column: dict) -> SchemaColumn:
         case SchemaColumnType.RANDOM:
             column_min = column.get("min")
             column_max = column.get("max")
-            if not column_min and column_min != 0:
+            if (not column_min) and (column_min != 0) and (column_max is not None):
                 raise ValueError(f"Column {column_name} of type {column_type} is missing min")
-            elif not column_max and column_max != 0:
+            elif (not column_max) and (column_max != 0) and (column_min is not None):
                 raise ValueError(f"Column {column_name} of type {column_type} is missing max")
             else:
                 return SchemaColumnRandomFactory.create(name = column_name, min = column_min, max = column_max)
