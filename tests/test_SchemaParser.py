@@ -16,6 +16,12 @@ column_random_valid = {
     "max" : 1
 }
 
+column_random_missing_name = {
+    "data_type": "Int",
+    "min": 0,
+    "max" : 1
+}
+
 column_random_missing_type = {
     "name": "column_test",
     "data_type": "Int",
@@ -33,8 +39,12 @@ column_random_invalid_type = {
 
 def test_parse_column_valid():
     random = parse_column_type(column_random_valid)
-    assert isinstance(random, SchemaColumnRandom)
+    assert isinstance(random, SchemaColumn)
     assert vars(random) == {"_name" : "column_test", "_min": 0, "_max" : 1}
+
+def test_parse_column_missing_name():
+    with pytest.raises(ValueError):
+        parse_column_type(column_random_missing_name)
 
 def test_parse_column_missing_type():
     with pytest.raises(ValueError):
