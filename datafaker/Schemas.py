@@ -243,10 +243,10 @@ class SchemaColumnRandomFactory:
             return SchemaColumnRandomNumeric(name, min, max)
         elif ( isinstance(min, float) & isinstance(max, float) ):
             return SchemaColumnRandomNumeric(name, min, max)
-        elif ( isinstance(min, date) & isinstance(max, date) ):
-            return SchemaColumnRandomDate(name, min, max)
         elif ( isinstance(min, datetime) & isinstance(max, datetime) ):
             return SchemaColumnRandomTimestamp(name, min, max)
+        elif ( isinstance(min, date) & isinstance(max, date) & (not isinstance(max, datetime)) ):
+            return SchemaColumnRandomDate(name, min, max)
         else:
             raise TypeError(f"Unsupported types for random column: min={type(min)}, max={type(max)}")
 
