@@ -9,6 +9,7 @@
 
 import yaml
 from datafaker.Schemas import *
+from typing import List
 
 
 # Column Parsing
@@ -52,7 +53,12 @@ def parse_column_type(column: dict) -> SchemaColumn:
             column_values = column.get("values")
             if not column_values:
                 raise ValueError(f"Column {column_name} of type {column_type} is missing values")
+            elif not isinstance(column_values, List):
+                raise ValueError(f"Column {column_name} of type {column_type} is not a list")
             else:
+                first_val_type = type(column_values[0])
+                if not all(isinstance(val, first_val_type) for val in column_values):
+                    raise ValueError(f"Column{column_name} of type {column_type} has a list of multiple types")
                 return SchemaColumnSelection(name = column_name, values = column_values)
             
         case SchemaColumnType.SEQUENTIAL:
