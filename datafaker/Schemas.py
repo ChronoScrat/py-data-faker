@@ -17,7 +17,7 @@ from datetime import datetime, timedelta, date
 
 import pyspark.sql.functions as F
 from pyspark.sql import Column
-from pyspark.sql.types import IntegerType, DoubleType, StringType, DateType, TimestampType
+from pyspark.sql.types import IntegerType, DoubleType, StringType, DateType, TimestampType, BooleanType
 
 
 # Schema Class: this is the master schema class, that holds a list of different tables.
@@ -56,6 +56,8 @@ class SchemaColumn(ABC):
 
 class SchemaColumnExpression(SchemaColumn):
     def __init__(self, name: str, expression: str):
+        if not isinstance(expression, str):
+            raise TypeError(f"Expected string for expression in column {name}, got {type(expression).__name__}")
         self._name = name
         self._expression = expression
     
@@ -241,10 +243,10 @@ class SchemaColumnRandomFactory:
             return SchemaColumnRandomNumeric(name, min, max)
         elif ( isinstance(min, float) & isinstance(max, float) ):
             return SchemaColumnRandomNumeric(name, min, max)
-        elif ( isinstance(min, date) & isinstance(max, date) ):
-            return SchemaColumnRandomDate(name, min, max)
         elif ( isinstance(min, datetime) & isinstance(max, datetime) ):
             return SchemaColumnRandomTimestamp(name, min, max)
+        elif ( isinstance(min, date) & isinstance(max, date) & (not isinstance(max, datetime)) & (not isinstance(min, datetime)) ):
+            return SchemaColumnRandomDate(name, min, max)
         else:
             raise TypeError(f"Unsupported types for random column: min={type(min)}, max={type(max)}")
 
@@ -255,8 +257,16 @@ class SchemaColumnRandomFactory:
 
 class SchemaColumnSelection(SchemaColumn):
     def __init__(self, name: str, values: List[Any]):
+        if not isinstance(values, List):
+            raise TypeError(f"Expected list in column {name}, got {type(values).__name__}")
+        
+        first_val_type = type(values[0])
+        if not all(isinstance(x, first_val_type) for x in values):
+            raise TypeError(f"Expected elements of the same type in values for column {name}")
+
         self._name = name
         self._values = values
+
     
     @property
     def name(self) -> str:
@@ -279,10 +289,12 @@ class SchemaColumnSelection(SchemaColumn):
                 return_type = DoubleType()
             case builtins.str:
                 return_type = StringType()
-            case datetime.date:
-                return_type = DateType()
             case datetime.datetime:
                 return_type = TimestampType()
+            case datetime.date:
+                return_type = DateType()
+            case builtins.bool:
+                return_type = BooleanType()
             case _:
                 raise TypeError(f"Unsupported value type: {type(first_val)}")
         

@@ -9,6 +9,7 @@
 
 import yaml
 from datafaker.Schemas import *
+from typing import List
 
 
 # Column Parsing
@@ -52,7 +53,12 @@ def parse_column_type(column: dict) -> SchemaColumn:
             column_values = column.get("values")
             if not column_values:
                 raise ValueError(f"Column {column_name} of type {column_type} is missing values")
+            elif not isinstance(column_values, List):
+                raise ValueError(f"Column {column_name} of type {column_type} is not a list")
             else:
+                first_val_type = type(column_values[0])
+                if not all(isinstance(val, first_val_type) for val in column_values):
+                    raise ValueError(f"Column{column_name} of type {column_type} has a list of multiple types")
                 return SchemaColumnSelection(name = column_name, values = column_values)
             
         case SchemaColumnType.SEQUENTIAL:
@@ -68,12 +74,15 @@ def parse_column_type(column: dict) -> SchemaColumn:
         case SchemaColumnType.RANDOM:
             column_min = column.get("min")
             column_max = column.get("max")
-            if not column_min and column_min != 0:
+            if (not column_min) and (column_min != 0) and (column_max is not None):
                 raise ValueError(f"Column {column_name} of type {column_type} is missing min")
-            elif not column_max and column_max != 0:
+            elif (not column_max) and (column_max != 0) and (column_min is not None):
                 raise ValueError(f"Column {column_name} of type {column_type} is missing max")
             else:
                 return SchemaColumnRandomFactory.create(name = column_name, min = column_min, max = column_max)
+        
+        case _:
+            raise ValueError(f"Column {column_name} has unsupported column type: {column_type}")
 
 # Parse Schema from file
 # This method recieves the path to a file (the schema file) and returns
