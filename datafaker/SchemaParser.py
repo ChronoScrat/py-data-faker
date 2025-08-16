@@ -24,6 +24,20 @@ class SchemaColumnType:
 
 
 def parse_column_type(column: dict) -> SchemaColumn:
+    """Parses a column definition to generate a Column object.
+    This method recieves a dictionary containing a column definition, including the
+    name, type and necessary extra fields. It then creates a new instance of SchemaColumn
+    based on the type declared.
+
+    This method should not be called directly. It is invoked during the execution of
+    `parse_schema_from_file()`.
+
+    Args:
+        column (dict): a Python dictionary with the column definitions
+    Returns:
+        SchemaColumn: A SchemaColumn object. The actual implementation depends on the column type.
+
+    """
     column_name = column.get("name")
     column_type = column.get("column_type")
 
@@ -89,6 +103,17 @@ def parse_column_type(column: dict) -> SchemaColumn:
 # our Schema object, which contains all tables and columns to be generated.
 
 def parse_schema_from_file(file):
+    """Parses a yaml schema file and returns the necessary table definitions
+    to be run in a Spark session.
+
+    Args:
+        file (str): The path to the yaml schema file
+    
+    Returns:
+        Schema: The Schema of all tables to be generated in Spark
+
+    """
+
     with open(file, "r") as file:
         schema_defs = yaml.safe_load(file)
     
